@@ -17,7 +17,7 @@ jobs:
       #        run: ./vendor/bin/phpstan
 
       - name: Run phpunit
-        run: ./vendor/bin/phpunit
+        run: ./vendor/bin/phpunit src/
 
 #      - name: Run phpcs
 #        run: ./vendor/bin/phpcs
