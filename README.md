@@ -22,90 +22,129 @@ This version requires a minimum PHP version 8.1
 
 ## How to mock a client
 
+My advice is to create one `injectClient` private method in a TestCase class that will handler every request
+of a single client. If you have multiple clients, you could use of single mocked client instance, but it would be better
+to one mocked client for each client used in the code.
+
 ```php
-use DoppioGancio\MockedClient\HandlerBuilder;
-use DoppioGancio\MockedClient\ClientBuilder;
-use DoppioGancio\MockedClient\Route\RouteBuilder;
-use GuzzleHttp\Psr7\Response;
-use Http\Discovery\Psr17FactoryDiscovery;
-use Psr\Log\NullLogger;
+<?php
 
-$handlerBuilder = new HandlerBuilder(
-    Psr17FactoryDiscovery::findServerRequestFactory(),
-    new NullLogger()
-);
+namespace DoppioGancio\MockedSymfonyClient\Tests;
 
-$route = new RouteBuilder(
-    Psr17FactoryDiscovery::findResponseFactory(),
-    Psr17FactoryDiscovery::findStreamFactory(),
-);
+use DoppioGancio\MockedSymfonyClient\MockedClient;
+use PHPUnit\Framework\TestCase;
 
-// Route with Response
-$handlerBuilder->addRoute(
-    $route->new()
-        ->withMethod('GET')
-        ->withPath('/country/IT')
-        ->withResponse(new Response(200, [], '{"id":"+39","code":"IT","name":"Italy"}'))
-        ->build()
-);
+class RealExampleTest extends TestCase
+{
+    private MockedClient $jsonPlaceHolderClient;
+    private MockedClient $dummyJsonClient;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-$clientBuilder = new ClientBuilder($handlerBuilder);
-$client = $clientBuilder->build();
+        $this->injectJsonPlaceHolderClient();
+        $this->injectDummyJsonClient();
+    }
+    
+    public function testGetUserByJsonPlaceHolderApi(): void
+    {
+        $response = $this->jsonPlaceHolderClient->request('GET', '/user/1');
+        self::assertEquals(200, $response->getStatusCode());
+
+        $user = $response->toArray();
+        self::assertEquals('Leanne Graham', $user['name']);
+    }
+
+    private function injectJsonPlaceHolderClient(): void
+    {
+        $client = new MockedClient([
+            'base_uri' => [
+                'https://jsonplaceholder.typicode.com',
+            ],
+        ]);
+
+        $this->jsonPlaceHolderClient = $client;
+    }
+
+    private function injectDummyJsonClient(): void
+    {
+        $client = new MockedClient([
+            'base_uri' => [
+                'https://dummyjson.com',
+            ],
+        ]);
+
+        $this->dummyJsonClient = $client;
+    }
+}
 ```
 
-### Advanced examples
+If you run the test now will fail because we did not yet mock any response. The good part is that
+the exception will suggest us which request to mock.
 
-1. [Route with a file](./docs/route-with-file-response.md)
-2. [Route with a string](./docs/route-with-string-response.md)
-3. [Route with consecutive calls](./docs/route-with-consecutive-calls.md)
-4. [Route with callbacks](./docs/route-with-callbacks.md)
-5. [Guzzle client with middlewares](./docs/route-with-consecutive-calls.md)
+```
+RequestHandlerNotFoundException: Request Handler not found: GET /user/1
+```
+
+### How to mock a request/response
+
+I first create a fixture json file with the expected content and then I mock the request.
+
+```angular2html
+[...]
+
+use DoppioGancio\MockedSymfonyClient\Request\Handler;
+
+[...]
+
+$client->addRequestHandler(
+method: 'GET',
+url: '/country/it',
+requestHandler: new Handler\JsonFileRequestHandler(
+filename: __DIR__ . '/fixtures/jsonplaceholder/user_1.json'
+)
+);
+```
+
+### Other request handlers
+
+1. Handler\ArrayRequestHandler::class,
+2. Handler\CallbackRequestHandler::class,
+3. Handler\ConsecutiveCallsRequestHandler::class,
+4. Handler\TextFileRequestHandler::class,
+5. Handler\TextRequestHandler::class
 
 ## How to use the client
 
 ```php
-$response = $client->request('GET', '/country/DE/json');
-$body = (string) $response->getBody();
-$country = json_decode($body, true);
-
-print_r($country);
+$response = $this->jsonPlaceHolderClient->request('GET', '/user/1');
+$user = $response->toArray();
 
 // will return
-Array
-(
-    [id] => +49
-    [code] => DE
-    [name] => Germany
-)
-```
-
-## Some recommendations...
-
-### Fail Fast, Fail Often
-
-If you don't know in advance which routes are needed, don't worry, start with a client without routes, and let it
-suggests which routes to add.
-
-```php
-$handlerBuilder = new HandlerBuilder(
-    Psr17FactoryDiscovery::findServerRequestFactory(),
-    new NullLogger()
-);
-
-// don't add any route for now...
-
-$clientBuilder = new ClientBuilder($handlerBuilder);
-$client = $clientBuilder->build();
-```
-
-Run the test: the test will fail, but it will suggest you the route that is missing.
-By doing this, it will only specify the needed routes.
-
-An example:
-
-```shell 
-DoppioGancio\MockedClient\Exception\RouteNotFound: Mocked route GET /admin/dashboard not found
+array:8 [
+  "id" => 1
+  "name" => "Leanne Graham"
+  "username" => "Bret"
+  "email" => "Sincere@april.biz"
+  "address" => array:5 [
+    "street" => "Kulas Light"
+    "suite" => "Apt. 556"
+    "city" => "Gwenborough"
+    "zipcode" => "92998-3874"
+    "geo" => array:2 [
+      "lat" => "-37.3159"
+      "lng" => "81.1496"
+    ]
+  ]
+  "phone" => "1-770-736-8031 x56442"
+  "website" => "hildegard.org"
+  "company" => array:3 [
+    "name" => "Romaguera-Crona"
+    "catchPhrase" => "Multi-layered client-server neural-net"
+    "bs" => "harness real-time e-markets"
+  ]
+]
 ```
 
 ### Inject the client in the service container
@@ -114,7 +153,5 @@ If you have a service container, add the client to it, so that every service dep
 
 ```php
 self::$container->set(Client::class, $client);
-
-// In Symfony
-self::$container->set('eight_points_guzzle.client.my_client', $client);
+self::$container->set('my_named_client', $client);
 ```

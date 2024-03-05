@@ -34,10 +34,6 @@ class MockedClient implements HttpClientInterface
 
     public function addRequestHandler(string $method, string $url, RequestHandlerInterface $requestHandler): void
     {
-        if (!empty($this->options['base_uri'])) {
-            $url = $this->options['base_uri'][0] . $url;
-        }
-
         $key = $this->getKey($method, $url);
         $this->handlers[$key] = $requestHandler;
     }
@@ -49,6 +45,7 @@ class MockedClient implements HttpClientInterface
      */
     public function getKey(string $method, string $url): string
     {
+
         return $method . ' ' . $url;
     }
 
@@ -64,7 +61,6 @@ class MockedClient implements HttpClientInterface
     {
         $key = $this->getKey($method, $url);
         if (!array_key_exists($key, $this->handlers)) {
-            $url = str_replace($this->options['base_uri'] ?? '', '', $url);
             throw new RequestHandlerNotFoundException($method, $url);
         }
 
