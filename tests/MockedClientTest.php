@@ -1,14 +1,10 @@
 <?php
 
-namespace DoppioGancio\MockedSymfonyClient;
+namespace DoppioGancio\MockedSymfonyClient\Tests;
 
 use DoppioGancio\MockedSymfonyClient\Exception\RequestHandlerNotFoundException;
-use DoppioGancio\MockedSymfonyClient\Request\ArrayRequestHandler;
-use DoppioGancio\MockedSymfonyClient\Request\CallbackRequestHandler;
-use DoppioGancio\MockedSymfonyClient\Request\ConsecutiveCallsRequestHandler;
-use DoppioGancio\MockedSymfonyClient\Request\JsonFileRequestHandler;
-use DoppioGancio\MockedSymfonyClient\Request\TextFileRequestHandler;
-use DoppioGancio\MockedSymfonyClient\Request\TextRequestHandler;
+use DoppioGancio\MockedSymfonyClient\MockedClient;
+use DoppioGancio\MockedSymfonyClient\Request\Handler;
 use DoppioGancio\MockedSymfonyClient\Response\Response;
 use PHPUnit\Framework\TestCase;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -21,12 +17,6 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 class MockedClientTest extends TestCase
 {
     private MockedClient $client;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->injectClient();
-    }
 
     /**
      * @throws ClientExceptionInterface
@@ -82,7 +72,7 @@ class MockedClientTest extends TestCase
      */
     public function testOverwriteRequestHandler(): void
     {
-        $handler = new CallbackRequestHandler(
+        $handler = new Handler\CallbackRequestHandler(
             callback: function (string $method, string $url): ResponseInterface {
                 $content = file_get_contents(__DIR__ . '/fixtures/country_it.json');
 
@@ -190,6 +180,12 @@ class MockedClientTest extends TestCase
         self::assertStringStartsWith('Lorem Ipsum is simply dummy text', $response->getContent());
     }
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->injectClient();
+    }
+
     private function injectClient(): void
     {
         $client = new MockedClient([
@@ -201,23 +197,23 @@ class MockedClientTest extends TestCase
         $client->addRequestHandler(
             method: 'GET',
             url: '/country/it',
-            requestHandler: new JsonFileRequestHandler(filename: __DIR__ . '/fixtures/country_it.json')
+            requestHandler: new Handler\JsonFileRequestHandler(filename: __DIR__ . '/fixtures/country_it.json')
         );
 
         $client->addRequestHandler(
             method: 'GET',
             url: '/country/de',
-            requestHandler: new TextRequestHandler(text: 'Country not found!', status: 404)
+            requestHandler: new Handler\TextRequestHandler(text: 'Country not found!', status: 404)
         );
 
         $client->addRequestHandler(
             method: 'GET',
             url: '/country/pr',
-            requestHandler: new ConsecutiveCallsRequestHandler(
+            requestHandler: new Handler\ConsecutiveCallsRequestHandler(
                 handlers: [
-                    new ArrayRequestHandler(data: ['response' => '#1']),
-                    new ArrayRequestHandler(data: ['response' => '#2']),
-                    new ArrayRequestHandler(data: ['response' => '#3']),
+                    new Handler\ArrayRequestHandler(data: ['response' => '#1']),
+                    new Handler\ArrayRequestHandler(data: ['response' => '#2']),
+                    new Handler\ArrayRequestHandler(data: ['response' => '#3']),
                 ]
             )
         );
@@ -225,7 +221,7 @@ class MockedClientTest extends TestCase
         $client->addRequestHandler(
             method: 'GET',
             url: '/country/es',
-            requestHandler: new CallbackRequestHandler(
+            requestHandler: new Handler\CallbackRequestHandler(
                 callback: function (string $method, string $url, array $options): ResponseInterface {
                     $content = file_get_contents(__DIR__ . '/fixtures/country_es.json');
 
@@ -240,7 +236,7 @@ class MockedClientTest extends TestCase
         $client->addRequestHandler(
             'PUT',
             '/lorem/ipsum',
-            requestHandler: new TextFileRequestHandler(filename: __DIR__ . '/fixtures/lorem_ipsum.txt')
+            requestHandler: new Handler\TextFileRequestHandler(filename: __DIR__ . '/fixtures/lorem_ipsum.txt')
         );
 
         $this->client = $client;

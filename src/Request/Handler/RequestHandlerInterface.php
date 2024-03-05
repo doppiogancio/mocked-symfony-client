@@ -1,6 +1,6 @@
 <?php
 
-namespace DoppioGancio\MockedSymfonyClient\Request;
+namespace DoppioGancio\MockedSymfonyClient\Request\Handler;
 
 interface RequestHandlerInterface
 {
