@@ -30,7 +30,7 @@ class MockedClientTest extends TestCase
     {
         $response = $this->client->request(
             'GET',
-            'https://www.myapi.com/country/it'
+            '/country/it'
         );
 
         $country = $response->toArray();
@@ -54,7 +54,7 @@ class MockedClientTest extends TestCase
     {
         $country = $this->client->request(
             'GET',
-            'https://www.myapi.com/country/es'
+            '/country/es'
         )->toArray();
 
         self::assertEquals('Spain', $country['name']);
@@ -95,12 +95,12 @@ class MockedClientTest extends TestCase
 
         $response = $this->client->request(
             'GET',
-            'https://www.myapi.com/country/uk'
+            '/country/uk'
         );
 
         self::assertEquals('1234', $response->getHeaders()['Api-Key']);
         self::assertEquals(
-            'https://www.myapi.com/country/uk',
+            '/country/uk',
             $response->getHeaders()['Referrer']
         );
     }
@@ -117,7 +117,7 @@ class MockedClientTest extends TestCase
     {
         $response = $this->client->request(
             'GET',
-            'https://www.myapi.com/country/de'
+            '/country/de'
         );
 
         self::assertEquals(404, $response->getStatusCode());
@@ -134,10 +134,7 @@ class MockedClientTest extends TestCase
         // The exception message removes from the url the client base_uri when configured.
         self::expectExceptionMessage('Request Handler not found: GET /country/fr');
 
-        $this->client->request(
-            'GET',
-            'https://www.myapi.com/country/fr'
-        );
+        $this->client->request('GET', '/country/fr');
     }
 
     /**
@@ -154,7 +151,7 @@ class MockedClientTest extends TestCase
         foreach (range(1, 4) as $ignored) {
             $data[] = $this->client->request(
                 'GET',
-                'https://www.myapi.com/country/pr'
+                '/country/pr'
             )->toArray();
         }
 
@@ -176,7 +173,7 @@ class MockedClientTest extends TestCase
      */
     public function testTextFileRequestHandler(): void
     {
-        $response = $this->client->request('PUT', 'https://www.myapi.com/lorem/ipsum');
+        $response = $this->client->request('PUT', '/lorem/ipsum');
         self::assertStringStartsWith('Lorem Ipsum is simply dummy text', $response->getContent());
     }
 
