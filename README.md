@@ -99,11 +99,11 @@ use DoppioGancio\MockedSymfonyClient\Request\Handler;
 [...]
 
 $client->addRequestHandler(
-method: 'GET',
-url: '/country/it',
-requestHandler: new Handler\JsonFileRequestHandler(
-filename: __DIR__ . '/fixtures/jsonplaceholder/user_1.json'
-)
+    method: 'GET',
+    url: '/country/it',
+    requestHandler: new Handler\JsonFileRequestHandler(
+        filename: __DIR__ . '/fixtures/jsonplaceholder/user_1.json'
+    )
 );
 ```
 
