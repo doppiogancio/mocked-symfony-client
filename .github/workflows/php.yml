@@ -1,28 +1,23 @@
-name: PHP Composer
-
+name: Code review
 on: [push]
 jobs:
-  build:
-
+  code-review:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
+      - name: Check out code
+        uses: actions/checkout@v3
 
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
+      - name: Composer version
+        run: cd ${{ github.workspace }}
 
-    - name: Cache Composer packages
-      id: composer-cache
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
+      - name: Composer dependencies
+        run: composer install --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
 
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+#      - name: Run phpstan
+#        run: ./vendor/bin/phpstan
 
-    - name: Run test suite
-      run: vendor/bin/phpunit
+      - name: Run phpunit
+        run: ./vendor/bin/phpunit
+
+#      - name: Run phpcs
+#        run: ./vendor/bin/phpcs
