@@ -1,5 +1,5 @@
 name: Code review
-on: [push]
+on: [ push ]
 jobs:
   code-review:
     runs-on: ubuntu-latest
@@ -13,8 +13,8 @@ jobs:
       - name: Composer dependencies
         run: composer install --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
 
-#      - name: Run phpstan
-#        run: ./vendor/bin/phpstan
+      #      - name: Run phpstan
+      #        run: ./vendor/bin/phpstan
 
       - name: Run phpunit
         run: ./vendor/bin/phpunit
