@@ -45,14 +45,14 @@ class Request implements RequestInterface
         return array_key_exists($name, $this->headers);
     }
 
-    public function getHeader(string $name): array
-    {
-        return $this->headers[$name] ?? [];
-    }
-
     public function getHeaderLine(string $name): string
     {
         return implode(',', $this->getHeader($name));
+    }
+
+    public function getHeader(string $name): array
+    {
+        return $this->headers[$name] ?? [];
     }
 
     public function withHeader(string $name, $value): MessageInterface

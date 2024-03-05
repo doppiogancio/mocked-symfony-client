@@ -8,9 +8,9 @@ class Response implements ResponseInterface
 {
     public function __construct(
         private readonly string $content,
-        private readonly array $contentAsArray,
-        private readonly int $status = 200,
-        private readonly array $headers = [],
+        private readonly array  $contentAsArray,
+        private readonly int    $status = 200,
+        private readonly array  $headers = [],
     )
     {
     }

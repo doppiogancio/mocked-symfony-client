@@ -3,7 +3,7 @@
 namespace DoppioGancio\MockedSymfonyClient;
 
 use DoppioGancio\MockedSymfonyClient\Exception\RequestHandlerNotFoundException;
-use DoppioGancio\MockedSymfonyClient\Request\RequestHandlerInterface;
+use DoppioGancio\MockedSymfonyClient\Request\Handler\RequestHandlerInterface;
 use Exception;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -11,6 +11,8 @@ use Symfony\Contracts\HttpClient\ResponseStreamInterface;
 
 class MockedClient implements HttpClientInterface
 {
+    private array $handlers = [];
+
     public function __construct(private readonly array $options = [])
     {
     }
@@ -25,8 +27,6 @@ class MockedClient implements HttpClientInterface
         return new MockedClient($options);
     }
 
-    private array $handlers = [];
-
     public function reset(): void
     {
         $this->handlers = [];
@@ -40,6 +40,16 @@ class MockedClient implements HttpClientInterface
 
         $key = $this->getKey($method, $url);
         $this->handlers[$key] = $requestHandler;
+    }
+
+    /**
+     * @param string $method
+     * @param string $url
+     * @return string
+     */
+    public function getKey(string $method, string $url): string
+    {
+        return $method . ' ' . $url;
     }
 
     public function getHandlers(): array
@@ -71,15 +81,5 @@ class MockedClient implements HttpClientInterface
     public function stream($responses, float $timeout = null): ResponseStreamInterface
     {
         throw new Exception('not yet implemented!');
-    }
-
-    /**
-     * @param string $method
-     * @param string $url
-     * @return string
-     */
-    public function getKey(string $method, string $url): string
-    {
-        return $method . ' ' . $url;
     }
 }
