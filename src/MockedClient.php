@@ -13,7 +13,7 @@ class MockedClient implements HttpClientInterface
 {
     private array $handlers = [];
 
-    public function __construct(private readonly array $options = [])
+    public function __construct(private array $options = [])
     {
     }
 
@@ -24,7 +24,8 @@ class MockedClient implements HttpClientInterface
 
     public function withOptions(array $options): static
     {
-        return new MockedClient($options);
+        $this->options = $options;
+        return $this;
     }
 
     public function reset(): void

@@ -177,6 +177,14 @@ class MockedClientTest extends TestCase
         self::assertStringStartsWith('Lorem Ipsum is simply dummy text', $response->getContent());
     }
 
+    public function testWithOptions()
+    {
+        $client = new MockedClient(['base_uri' => 'http://www.site1.com']);
+        self::assertEquals('http://www.site1.com', $client->getOptions()['base_uri']);
+        $client = $client->withOptions(['base_uri' => 'http://www.site2.com']);
+        self::assertEquals('http://www.site2.com', $client->getOptions()['base_uri']);
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
