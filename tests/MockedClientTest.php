@@ -6,7 +6,10 @@ use DoppioGancio\MockedSymfonyClient\Exception\RequestHandlerNotFoundException;
 use DoppioGancio\MockedSymfonyClient\MockedClient;
 use DoppioGancio\MockedSymfonyClient\Request\Handler;
 use DoppioGancio\MockedSymfonyClient\Response\Response;
+use http\Exception\RuntimeException;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpClient\Exception\ClientException;
+use Symfony\Component\HttpClient\Exception\ServerException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -120,6 +123,18 @@ class MockedClientTest extends TestCase
             '/country/de'
         );
 
+        self::assertEquals(404, $response->getStatusCode());
+        self::assertEquals('Country not found!', $response->getContent(false));
+    }
+
+    public function testTextRequestHandlerThrowingExceptions(): void
+    {
+        $response = $this->client->request(
+            'GET',
+            '/country/de'
+        );
+
+        self::expectException(ClientException::class);
         self::assertEquals(404, $response->getStatusCode());
         self::assertEquals('Country not found!', $response->getContent());
     }
