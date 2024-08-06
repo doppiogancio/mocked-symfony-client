@@ -18,8 +18,9 @@ class Request implements RequestInterface
     private string $method;
     private UriInterface $uri;
 
-    public function __construct(string $url)
+    public function __construct(string $method, string $url)
     {
+        $this->method = $method;
         $this->uri = new Uri($url);
     }
 

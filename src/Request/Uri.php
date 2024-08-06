@@ -21,8 +21,8 @@ class Uri implements UriInterface
         $this->fullUrl = $url;
         $info = parse_url($url);
 
-        $this->scheme = $info['scheme'];
-        $this->host = $info['host'];
+        $this->scheme = $info['scheme'] ?? '';
+        $this->host = $info['host'] ?? '';
         $this->port = $info['port'] ?? null;
         $this->user = $info['user'] ?? '';
         $this->pass = $info['pass'] ?? '';
