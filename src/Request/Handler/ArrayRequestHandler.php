@@ -2,6 +2,7 @@
 
 namespace DoppioGancio\MockedSymfonyClient\Request\Handler;
 
+use DoppioGancio\MockedSymfonyClient\Request\Request;
 use DoppioGancio\MockedSymfonyClient\Response\Response;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 

@@ -2,6 +2,7 @@
 
 namespace DoppioGancio\MockedSymfonyClient\Response;
 
+use DoppioGancio\MockedSymfonyClient\Request\Request;
 use Symfony\Component\HttpClient\Exception\ClientException;
 use Symfony\Component\HttpClient\Exception\RedirectionException;
 use Symfony\Component\HttpClient\Exception\ServerException;
@@ -9,6 +10,8 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class Response implements ResponseInterface
 {
+    private ?Request $request = null;
+
     public function __construct(
         private readonly string $content,
         private readonly array  $contentAsArray,
@@ -16,6 +19,12 @@ class Response implements ResponseInterface
         private readonly array  $headers = [],
     )
     {
+    }
+
+    public function setRequest(Request $request): self
+    {
+        $this->request = $request;
+        return $this;
     }
 
     public function getStatusCode(): int
@@ -59,7 +68,7 @@ class Response implements ResponseInterface
     {
         $info = [
             'http_code' => $this->status,
-            'url' => '',
+            'url' => (string) $this->request?->getUri(),
             'response_headers' => $this->headers,
         ];
 

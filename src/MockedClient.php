@@ -4,6 +4,8 @@ namespace DoppioGancio\MockedSymfonyClient;
 
 use DoppioGancio\MockedSymfonyClient\Exception\RequestHandlerNotFoundException;
 use DoppioGancio\MockedSymfonyClient\Request\Handler\RequestHandlerInterface;
+use DoppioGancio\MockedSymfonyClient\Request\Request;
+use DoppioGancio\MockedSymfonyClient\Response\Response;
 use Exception;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -65,7 +67,9 @@ class MockedClient implements HttpClientInterface
             throw new RequestHandlerNotFoundException($method, $url);
         }
 
-        return $this->handlers[$key]($method, $url, $options);
+        /** @var Response $response */
+        $response = $this->handlers[$key]($method, $url, $options);
+        return $response->setRequest(new Request($method, $url));
     }
 
     /**

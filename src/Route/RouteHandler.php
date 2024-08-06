@@ -2,7 +2,7 @@
 
 namespace DoppioGancio\MockedSymfonyClient\Route;
 
-use DoppioGancio\MockedSymfonyClient\Request\RequestHandlerInterface;
+use DoppioGancio\MockedSymfonyClient\Request\Handler\RequestHandlerInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class RouteHandler
@@ -12,8 +12,7 @@ class RouteHandler
         public readonly string                  $url,
         public readonly RequestHandlerInterface $handler,
         public readonly array                   $headers = [],
-    )
-    {
+    ) {
     }
 
     public function __invoke(string $url, string $method, array $options): ResponseInterface
